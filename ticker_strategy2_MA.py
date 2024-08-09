@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 if __name__ == '__main__':
-    tick = yf.Ticker('VOO', )
+    tick = yf.Ticker('SPY', )
     # period = '5y'
     period = 'max'
 
