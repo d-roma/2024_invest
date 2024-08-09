@@ -1,25 +1,23 @@
-import yfinance as yf
+import matplotlib
 import mplfinance as mpf
-import datetime
+import yfinance as yf
 from scipy.signal import argrelextrema
 
-import matplotlib
 matplotlib.use('QtAgg')
 
 import pandas as pd
-from matplotlib import pyplot as plt
 
 import numpy as np
 
 if __name__ == '__main__':
     tick = yf.Ticker('SPY', )
-    #period = '5y'
+    # period = '5y'
     period = 'max'
 
     ### Benchmark
 
     df_original = tick.history(period=period, interval="1d",
-                      start=None, end=None, )
+                               start=None, end=None, )
 
     ### Ideal enter-quit results
 
@@ -32,9 +30,9 @@ if __name__ == '__main__':
     df['sell'] = df.iloc[argrelextrema(df.High.values, np.greater_equal,
                                        order=n)[0]]['High']
 
-    df.loc[:,'MA50'] = df['Close'].rolling(window=int(50), min_periods=1).mean()
-    df.loc[:,'MA100'] = df['Close'].rolling(window=int(100), min_periods=1).mean()
-    df.loc[:,'MA200'] = df['Close'].rolling(window=int(200), min_periods=1).mean()
+    df.loc[:, 'MA50'] = df['Close'].rolling(window=int(50), min_periods=1).mean()
+    df.loc[:, 'MA100'] = df['Close'].rolling(window=int(100), min_periods=1).mean()
+    df.loc[:, 'MA200'] = df['Close'].rolling(window=int(200), min_periods=1).mean()
 
     buy_series = df['buy'].dropna()
     sell_series = df['sell'].dropna()
@@ -48,9 +46,9 @@ if __name__ == '__main__':
             break
 
     pd_buy = pd.DataFrame(buy_series.rename("value"), )
-    pd_buy["type"] =  1
+    pd_buy["type"] = 1
     pd_sell = pd.DataFrame(sell_series.rename("value"), )
-    pd_sell["type"] =  0
+    pd_sell["type"] = 0
     orders = pd.concat((pd_buy, pd_sell)).sort_index()
     # Compute gain, guarantying order
     increments = []
@@ -73,12 +71,12 @@ if __name__ == '__main__':
     cummulative_increments = np.cumprod(1 + increment_values)
     time_span = df.index[-1] - df.index[0]
 
-    print("Benefit:\t\t", "%.2f" % (cummulative_increments[-1]*100), " %")
-    print("Annualized benefit:\t", "%.2f" % ((cummulative_increments[-1]*100)/(time_span.days/365)), " %")
+    print("Benefit:\t\t", "%.2f" % (cummulative_increments[-1] * 100), " %")
+    print("Annualized benefit:\t", "%.2f" % ((cummulative_increments[-1] * 100) / (time_span.days / 365)), " %")
 
     print("Max. drawdown:\t 0 by definition")
 
-    #df_plt = df[["Open", "High", "Low", "Close", "Volume", "buy", "sell"]]  # Select required columns
+    # df_plt = df[["Open", "High", "Low", "Close", "Volume", "buy", "sell"]]  # Select required columns
     df_plt = df
     df_plt.index.name = "Date"  # Set the index name
     df_plt = df_plt.reset_index()  # Reset the index

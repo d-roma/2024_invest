@@ -1,13 +1,8 @@
-import yfinance as yf
-import mplfinance as mpf
-import datetime
-from scipy.signal import argrelextrema
-
 import matplotlib
+import yfinance as yf
 
 matplotlib.use('QtAgg')
 
-import pandas as pd
 from matplotlib import pyplot as plt
 
 import numpy as np

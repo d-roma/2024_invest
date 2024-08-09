@@ -1,15 +1,12 @@
-import yfinance as yf
-import mplfinance as mpf
-import datetime
-from scipy.signal import argrelextrema
-
 import matplotlib
+import yfinance as yf
+
 matplotlib.use('QtAgg')
 
-import pandas as pd
 from matplotlib import pyplot as plt
 
 import numpy as np
+
 
 def compute_rsi(data, window=14):
     # Calculate the difference in price
@@ -31,9 +28,10 @@ def compute_rsi(data, window=14):
 
     return rsi
 
+
 if __name__ == '__main__':
     tick = yf.Ticker('SPY', )
-    #period = '5y'
+    # period = '5y'
     period = 'max'
 
     ### Strategy 1 -- RSI
@@ -43,21 +41,21 @@ if __name__ == '__main__':
     df = tick.history(period=period, interval="1wk",
                       start=None, end=None, )
 
-    df.loc[:,'RSI'] = compute_rsi(df, window=14)
-    df.loc[:,'MA50'] = df['Close'].rolling(window=int(50/5), min_periods=1).mean()
-    df.loc[:,'MA100'] = df['Close'].rolling(window=int(100/5), min_periods=1).mean()
-    df.loc[:,'MA200'] = df['Close'].rolling(window=int(200/5), min_periods=1).mean()
+    df.loc[:, 'RSI'] = compute_rsi(df, window=14)
+    df.loc[:, 'MA50'] = df['Close'].rolling(window=int(50 / 5), min_periods=1).mean()
+    df.loc[:, 'MA100'] = df['Close'].rolling(window=int(100 / 5), min_periods=1).mean()
+    df.loc[:, 'MA200'] = df['Close'].rolling(window=int(200 / 5), min_periods=1).mean()
 
     df = df.iloc[30:]
 
-    df.loc[:,'above_ma100'] = np.where((df['Close'] > df['MA100']), 1, 0)
-    df.loc[:,'above_ma50'] = np.where((df['Close'] > df['MA50']), 1, 0)
+    df.loc[:, 'above_ma100'] = np.where((df['Close'] > df['MA100']), 1, 0)
+    df.loc[:, 'above_ma50'] = np.where((df['Close'] > df['MA50']), 1, 0)
 
     df["buy_signal"] = 0
     df["sell_signal"] = 0
     df["status"] = 0
 
-    status = 0 # 0 out, 1 inside market
+    status = 0  # 0 out, 1 inside market
     p_rsi_below_40 = False
     p_row = None
     p_max = 0
@@ -79,14 +77,13 @@ if __name__ == '__main__':
         else:
             if data > p_max:
                 p_max = data
-            c_drawdown = (data - p_max)/p_max
+            c_drawdown = (data - p_max) / p_max
             if c_drawdown < drawdown:
                 drawdown = c_drawdown
             if (row.High < row['MA200']):
                 status = 0
                 df.loc[index, "sell_signal"] = 1
         df.loc[index, "status"] = status
-
 
     fig, axs = plt.subplots(2, 1, layout='constrained')
     axs[0].plot(df.index, df.Close, label='Close')
@@ -106,7 +103,7 @@ if __name__ == '__main__':
     i = 0
     increments = []
     for b_index in index_buy:
-        if index_sell.size < i+1:
+        if index_sell.size < i + 1:
             break
         s_index = index_sell[i]
         b_val = df.loc[b_index, 'Close']
@@ -120,7 +117,6 @@ if __name__ == '__main__':
     st1_cummulative_increments = np.cumprod(1 + st1_inc)
 
     time_span = df.index[-1] - df.index[0]
-    print("Benefit:\t\t", "%.2f" % (st1_cummulative_increments[-1]*100), " %")
-    print("Annualized benefit:\t", "%.2f" % ((st1_cummulative_increments[-1]*100)/(time_span.days/365)), " %")
-    print("Max. drawdown:\t", "%.2f" % (100*drawdown), " %")
-
+    print("Benefit:\t\t", "%.2f" % (st1_cummulative_increments[-1] * 100), " %")
+    print("Annualized benefit:\t", "%.2f" % ((st1_cummulative_increments[-1] * 100) / (time_span.days / 365)), " %")
+    print("Max. drawdown:\t", "%.2f" % (100 * drawdown), " %")

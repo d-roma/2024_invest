@@ -1,25 +1,19 @@
-import yfinance as yf
-import mplfinance as mpf
-import datetime
-from scipy.signal import argrelextrema
-
 import matplotlib
+import yfinance as yf
+
 matplotlib.use('QtAgg')
 
-import pandas as pd
 from matplotlib import pyplot as plt
-
-import numpy as np
 
 if __name__ == '__main__':
     tick = yf.Ticker('SPY', )
-    #period = '5y'
+    # period = '5y'
     period = 'max'
 
     ### Benchmark
 
     df_original = tick.history(period=period, interval="1d",
-                      start=None, end=None, )
+                               start=None, end=None, )
 
     ### Buy-and-hold results
 
@@ -44,7 +38,7 @@ if __name__ == '__main__':
     print("Max. drawdown:\t", "%.2f" % bh_max_drawdown, " %")
 
     plt.figure()
-    plt.plot(df.index, 100*(df.Close - df.iloc[0].Close)/df.iloc[0].Close)
+    plt.plot(df.index, 100 * (df.Close - df.iloc[0].Close) / df.iloc[0].Close)
     plt.ylabel("Relative change [%]")
     plt.grid(True)
     plt.show()
