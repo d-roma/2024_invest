@@ -21,7 +21,7 @@ if __name__ == '__main__':
     #period = '5y'
     period = 'max'
 
-    print("###### Strategy 3 - SAR")
+    print("###### Strategy 3 - SAR & MA")
 
     df = pd.DataFrame()
     df = df.ta.ticker("SPY", period=period, interval="1d",
@@ -32,8 +32,7 @@ if __name__ == '__main__':
     df.ta.sma(length=200, append=True)
 
     # df.ta.psar(af0=0.001, af=0.005, max_af=0.005, append=True) 1523%, -19%
-    # AF doesn't matter?
-    df.ta.psar(af0=0.001, af=0.001, max_af=0.005, append=True)
+    df.ta.psar(af0=0.001, af=0.005, max_af=0.005, append=True)
 
     PSARl_name = [i for i in df.columns if i.startswith('PSARl_')][0]
     PSARs_name = [i for i in df.columns if i.startswith('PSARs_')][0]
@@ -52,7 +51,7 @@ if __name__ == '__main__':
         # If we are out of the market
         if status == 0:
             # Wait for SAR
-            if not np.isnan(row["PSARl"]):
+            if not np.isnan(row["PSARl"]) and (row.Low > row['SMA_200']):
                 status = 1
                 df.loc[index, "buy_signal"] = 1
                 p_max = 0
@@ -63,8 +62,7 @@ if __name__ == '__main__':
             c_drawdown = (data - p_max) / p_max
             if c_drawdown < drawdown:
                 drawdown = c_drawdown
-            #if not np.isnan(row["PSARs"]) or (row.High < row['SMA_200']):
-            if not np.isnan(row["PSARs"]):
+            if not np.isnan(row["PSARs"]) or (row.High < row['SMA_200']):
                 status = 0
                 df.loc[index, "sell_signal"] = 1
         df.loc[index, "status"] = status
@@ -72,9 +70,8 @@ if __name__ == '__main__':
     plt.figure()
     plt.plot(df.index, df.Close, label='Close')
     plt.plot(df.index, df.SMA_200, label="SMA_200")
-    plt.plot(df.index, df.SMA_50, label="SMA_50", color="yellow")
-    plt.plot(df.index, df["PSARl"], label="SAR_Buy", marker='o', linestyle='None', markersize=1, color="green")
-    plt.plot(df.index, df["PSARs"], label="SAR_Sell", marker='o', linestyle='None', markersize=1, color="red")
+    plt.plot(df.index, df["PSARl"], label="SAR_Buy", marker='o', linestyle='None', markersize=1)
+    plt.plot(df.index, df["PSARs"], label="SAR_Sell", marker='o', linestyle='None', markersize=1)
     index_buy = df.index[np.where(df["buy_signal"] > 0)]
     plt.scatter(index_buy, df.Close[index_buy], marker="*", color="darkgreen", s=100)
     index_sell = df.index[np.where(df["sell_signal"] > 0)]
