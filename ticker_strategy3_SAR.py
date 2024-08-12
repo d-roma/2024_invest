@@ -31,9 +31,9 @@ if __name__ == '__main__':
     df.ta.sma(length=100, append=True)
     df.ta.sma(length=200, append=True)
 
-    # df.ta.psar(af0=0.001, af=0.005, max_af=0.005, append=True) 1523%, -19%
-    # AF doesn't matter?
-    df.ta.psar(af0=0.001, af=0.001, max_af=0.005, append=True)
+    # B&H: 2060%, -55%
+    df.ta.psar(af0=0.001, af=0.005, max_af=0.005, append=True) # 2070%, -19%
+    #df.ta.psar(af0=0.0001, af=0.0001, max_af=0.001, append=True)
 
     PSARl_name = [i for i in df.columns if i.startswith('PSARl_')][0]
     PSARs_name = [i for i in df.columns if i.startswith('PSARs_')][0]
@@ -68,6 +68,9 @@ if __name__ == '__main__':
                 status = 0
                 df.loc[index, "sell_signal"] = 1
         df.loc[index, "status"] = status
+
+    # Add a "fake" sell signal at the end to consider gain up to current date
+    df.loc[index, "sell_signal"] = 1
 
     plt.figure()
     plt.plot(df.index, df.Close, label='Close')
